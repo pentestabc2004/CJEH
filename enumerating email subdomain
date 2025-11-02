@@ -1,0 +1,39 @@
+now first we need the email and password to log in into email
+
+so lets get started with tool named username-anarchy
+
+lets first create a list of users mentioned working under the org pentest-abc.net
+
+nano userlist          
+Edward
+Alice
+Adam
+James
+Ash
+Jessy
+
+---------------------------------------------------------------------------------------------
+
+
+ ./username-anarchy --suffix @pentest-abc.net -i userlist 
+
+so this creates emails
+
+edward@pentest-abc.net
+alice@pentest-abc.net
+adam@pentest-abc.net
+james@pentest-abc.net
+ash@pentest-abc.net
+jessy@pentest-abc.net
+
+---------------------------------------------------------------------------------------------
+
+now lets create passwords for this emails 
+
+
+
+
+
+
+
+
