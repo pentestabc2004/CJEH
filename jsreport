@@ -1,0 +1,83 @@
+#Template
+
+<html>
+<head>
+  <title>Command Output</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #3399ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #66b2ff;
+      text-align: left;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .command-label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+
+    .command {
+      font-family: 'Courier New', monospace;
+      color: #99ccff;
+      background-color: #1a1a1a;
+      border-left: 4px solid #3399ff;
+      padding: 8px 12px;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .output-box {
+      background-color: #1e1e1e;
+      border: 2px solid #3399ff;
+      border-radius: 6px;
+      padding: 15px 20px;
+      white-space: pre-wrap;
+      max-width: 500px;
+      min-width: 300px;
+      font-size: 1rem;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+      color: #aad4ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>System Command Output</h1>
+
+  <div class="command-label">Executed Command:</div>
+  <div class="command">{{getCommand}}</div>
+
+  <div class="output-box">
+    {{rce}}
+  </div>
+</body>
+</html>
+
+
+#jscode
+const { execSync } = require('child_process');
+
+const cmd='uname -a';
+
+function rce(){
+  try {
+    const user = execSync(cmd, { encoding: 'utf8' }).trim();
+    return user;
+  } catch (err) {
+    console.error('Failed to execute whoami:', err.message || err);
+  }
+  req.data.exeCommand = cmd;
+}
+
+function getCommand() {
+  return cmd;  
+}
